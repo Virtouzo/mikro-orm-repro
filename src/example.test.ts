@@ -1,34 +1,37 @@
-import { MikroORM } from '@mikro-orm/sqlite';
-import { User } from './user.entity';
+import { MikroORM } from "@mikro-orm/sqlite";
+import { User } from "./user.entity";
 
 let orm: MikroORM;
 
 beforeAll(async () => {
-  orm = await MikroORM.init({
-    dbName: 'sqlite.db',
-    entities: ['dist/**/*.entity.js'],
-    entitiesTs: ['src/**/*.entity.ts'],
-    debug: ['query', 'query-params'],
-    allowGlobalContext: true, // only for testing
-  });
-  await orm.schema.refreshDatabase();
+	orm = await MikroORM.init({
+		dbName: "sqlite.db",
+		entities: ["dist/**/*.entity.js"],
+		entitiesTs: ["src/**/*.entity.ts"],
+		debug: ["query", "query-params"],
+		allowGlobalContext: true, // only for testing
+	});
+	await orm.schema.refreshDatabase();
 });
 
 afterAll(async () => {
-  await orm.close(true);
+	await orm.close(true);
 });
 
-test('basic CRUD example', async () => {
-  orm.em.create(User, { name: 'Foo', email: 'foo' });
-  await orm.em.flush();
-  orm.em.clear();
-
-  const user = await orm.em.findOneOrFail(User, { email: 'foo' });
-  expect(user.name).toBe('Foo');
-  user.name = 'Bar';
-  orm.em.remove(user);
-  await orm.em.flush();
-
-  const count = await orm.em.count(User, { email: 'foo' });
-  expect(count).toBe(0);
+test("basic CRUD example", async () => {
+	orm.em.create(User, {
+		name: "Parent",
+		email: "parent@email.com",
+		type: "PARENT",
+		id: 1,
+	});
+	orm.em.create(User, {
+		id: 2,
+		name: "Children",
+		email: "children@email.com",
+		type: "CHILDREN",
+		belongsToItem: 1,
+	});
+	await orm.em.flush();
+	orm.em.clear();
 });
